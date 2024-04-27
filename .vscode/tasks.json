@@ -1,0 +1,15 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build HTML5",
+      "type": "shell",
+      "command": "C:/Users/Josh/Desktop/Godot/Godot_v4.2-stable_win64.exe --headless project.godot --export-pack 'Web' index.pck",
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    }
+  ]
+}

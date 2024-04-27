@@ -1,0 +1,23 @@
+[gd_scene load_steps=2 format=3 uid="uid://pjabcjd7xxy7"]
+
+[ext_resource type="Script" path="res://Test.gd" id="1_moqa0"]
+
+[node name="Node2D" type="Node2D"]
+script = ExtResource("1_moqa0")
+
+[node name="upload" type="Button" parent="."]
+offset_left = 57.0
+offset_top = 159.0
+offset_right = 367.0
+offset_bottom = 237.0
+text = "Upload"
+
+[node name="download" type="Button" parent="."]
+offset_left = 58.0
+offset_top = 29.0
+offset_right = 368.0
+offset_bottom = 107.0
+text = "Download"
+
+[connection signal="pressed" from="upload" to="." method="_on_upload_button"]
+[connection signal="pressed" from="download" to="." method="_on_download_button"]
