@@ -22,8 +22,8 @@ func _ready():
 	
 	var notificationInt = JavaScriptBridge.get_interface("Notification")
 	notificationInt.requestPermission().then(JavaScriptBridge.create_callback(consoleLog))
-	var notif = JavaScriptBridge.create_object("Notification", "Script loaded!")
-	print(notif)
+	# var notif = JavaScriptBridge.create_object("Notification", "Script loaded!")
+	# print(notif)
 	
 	# setup file input
 	createFileInput(null)
@@ -33,7 +33,7 @@ func consoleLog(args):
 	print("Callback has fired off")
 	print(args)
 
-func createFileInput(callback: JavaScriptObject):
+func createFileInput(_callback: JavaScriptObject):
 	
 	window.input = document.createElement('input')
 	window.input.type = 'file'
@@ -65,10 +65,10 @@ func _on_download_button():
 		return
 	
 	## Simple download in oneline
-	# JavaScriptBridge.download_buffer(
-	# 	JSON.stringify({"hello": "hi"}).to_utf8_buffer(), 
-	# 	"savedData.json"
-	# )
+	JavaScriptBridge.download_buffer(
+		JSON.stringify({"hello": "hi"}).to_utf8_buffer(), 
+		"savedData.json"
+	)
 
 	var path = "/tmp/test.cfg"
 	var file = FileAccess.open(path, FileAccess.READ)

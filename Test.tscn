@@ -12,6 +12,13 @@ offset_right = 367.0
 offset_bottom = 237.0
 text = "Upload"
 
+[node name="upload" type="Button" parent="upload"]
+offset_left = -42.0
+offset_top = 202.0
+offset_right = 176.0
+offset_bottom = 284.0
+text = "Hey!!"
+
 [node name="download" type="Button" parent="."]
 offset_left = 58.0
 offset_top = 29.0

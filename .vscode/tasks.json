@@ -1,15 +1,54 @@
 {
-  "version": "2.0.0",
-  "tasks": [
-    {
-      "label": "Build HTML5",
-      "type": "shell",
-      "command": "C:/Users/Josh/Desktop/Godot/Godot_v4.2-stable_win64.exe --headless project.godot --export-pack 'Web' index.pck",
-      "problemMatcher": [],
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      }
-    }
-  ]
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Build HTML5",
+			"type": "shell",
+			"command": "${config:godotTools.editorPath.godot4} --headless --export-release 'Web' exports/index.html",
+			"problemMatcher": [],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		},
+		{
+			"label": "npx local-web-server",
+			"type": "shell",
+			"isBackground": true,
+			"command": "npx local-web-server --https --cors.embedder-policy 'require-corp' --cors.opener-policy 'same-origin' --directory exports",
+			"presentation": { "reveal": "silent" },
+			"problemMatcher": [
+				{
+					"pattern": [
+						{
+							"regexp": ".",
+							"file": 1,
+							"line": 1,
+							"column": 1,
+							"message": 1
+						}
+					],
+					"background": {
+						"activeOnStart": true,
+						"beginsPattern": { "regexp": "." },
+						"endsPattern": { "regexp": "." }
+					}
+				}
+			]
+		},
+		{
+			"label": "stop server",
+			"command": "echo ${input:terminate}",
+			"type": "shell"
+		}
+	],
+	// INFO https://christianheilmann.com/2022/03/17/automatically-starting-a-server-when-starting-a-debug-session-in-vs-code/
+	"inputs": [
+		{
+			"id": "terminate",
+			"type": "command",
+			"command": "workbench.action.tasks.terminate",
+			"args": "terminateAll"
+		}
+	]
 }
