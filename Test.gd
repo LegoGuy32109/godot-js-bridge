@@ -4,6 +4,12 @@ var console
 var document
 var window
 var Promise
+var navigator
+var jsJSON
+
+# must keep callback in global scope so it isn't discarded
+var generate_offers_callback = JavaScriptBridge.create_callback(_on_generate_offers)
+var generate_offers_func = JavaScriptBridge.get_interface("generateRoomConnections")
 
 func _ready():
 	if !OS.has_feature('web'):
@@ -14,7 +20,17 @@ func _ready():
 	document = JavaScriptBridge.get_interface("document")
 	window = JavaScriptBridge.get_interface("window")
 	Promise = JavaScriptBridge.get_interface("Promise")
+	navigator = JavaScriptBridge.get_interface("navigator")
+	jsJSON = JavaScriptBridge.get_interface("JSON")
 
+	window.generateRoomConnections().then(generate_offers_callback)
+
+func _on_generate_offers(args):
+	var result = args[0]
+	console.log(result)
+	print("Offers:", jsJSON.stringify(result))
+	
+	navigator.clipboard.writeText(jsJSON.stringify(result))
 
 
 
@@ -23,22 +39,7 @@ func _on_download_button():
 		print("Test must be run on Web export")
 		return
 
-	## Simple download in oneline
-	# JavaScriptBridge.download_buffer(
-	# 	JSON.stringify({"hello": "hi"}).to_utf8_buffer(),
-	# 	"savedData.json"
-	# )
-	#
-	# var path = "/tmp/test.cfg"
-	# var file = FileAccess.open(path, FileAccess.READ)
-	# var error = FileAccess.get_open_error()
-	# if error:
-	# 	push_error("Failed to load file %s" % error)
-	# 	return
-	# var fname = path.get_file()
-	# # var content = file.get_as_text()
-	# var buffer = file.get_buffer(file.get_length())
-	# JavaScriptBridge.download_buffer(buffer, fname)
+	window.generateRoomConnections().then(generate_offers_callback)
 
 func _on_upload_button():
 	if !OS.has_feature('web'):
