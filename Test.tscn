@@ -5,27 +5,31 @@
 [node name="Node2D" type="Node2D"]
 script = ExtResource("1_moqa0")
 
-[node name="upload" type="Button" parent="."]
+[node name="Host Controls" type="Node2D" parent="."]
+
+[node name="accept_answer_button" type="Button" parent="Host Controls"]
 offset_left = 57.0
 offset_top = 159.0
 offset_right = 367.0
 offset_bottom = 237.0
-text = "Upload"
+text = "Accept Answer"
 
-[node name="upload" type="Button" parent="upload"]
-layout_mode = 0
-offset_left = -42.0
-offset_top = 202.0
-offset_right = 176.0
-offset_bottom = 284.0
-text = "Hey!!"
-
-[node name="download" type="Button" parent="."]
+[node name="generate_offers_button" type="Button" parent="Host Controls"]
 offset_left = 58.0
 offset_top = 29.0
 offset_right = 368.0
 offset_bottom = 107.0
-text = "Download"
+text = "Generate Room Offer"
 
-[connection signal="pressed" from="upload" to="." method="_on_upload_button"]
-[connection signal="pressed" from="download" to="." method="_on_download_button"]
+[node name="Guest Controls" type="Node2D" parent="."]
+
+[node name="join_room_button" type="Button" parent="Guest Controls"]
+offset_left = 763.0
+offset_top = 36.0
+offset_right = 1016.0
+offset_bottom = 111.0
+text = "Join Room"
+
+[connection signal="pressed" from="Host Controls/accept_answer_button" to="." method="_on_accept_answer_button"]
+[connection signal="pressed" from="Host Controls/generate_offers_button" to="." method="_on_generate_offers_button"]
+[connection signal="pressed" from="Guest Controls/join_room_button" to="." method="_on_join_room_button"]
