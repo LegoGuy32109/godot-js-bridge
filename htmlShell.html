@@ -298,6 +298,15 @@ async function generateRoomConnection() {
 		negotiated: true,
 		id: 0,
 	});
+	output.channel.onopen = (event) => {
+		console.log("Channel to Guest was opened");
+		console.log(event);
+		const dataChannel = event.target;
+		dataChannel.send("Hi from Host");
+	}
+	output.channel.onmessage = (msgEvent) => {
+		console.log("recieved message: from Guest", msgEvent.data)
+	}
 
 	// create offer to start generating ice candidates
 	const offer = await pc.createOffer();
@@ -329,7 +338,7 @@ async function receiveConnectionOffers() {
 
 	// we have valid offers
 	const answers = await Promise.all(validOffers.map(receiveConnectionOffer));
-	const answerPackage = JSON.stringify(answers);
+	const answerPackage = JSON.stringify(answers.map(answer => answer.package));
 
 	await navigator.clipboard.writeText(answerPackage);
 
@@ -381,6 +390,15 @@ async function receiveConnectionOffer(offer) {
 		negotiated: true,
 		id: 0,
 	});
+	output.channel.onopen = (event) => {
+		console.log("Channel to Host was opened");
+		console.log(event);
+		const dataChannel = event.target;
+		dataChannel.send("Hi from guest");
+	}
+	output.channel.onmessage = (msgEvent) => {
+		console.log("recieved message: from Host", msgEvent.data)
+	}
 
 	const answer = await pc.createAnswer();
 	await pc.setLocalDescription(answer);
@@ -401,7 +419,7 @@ async function receiveConnectionOffer(offer) {
 // INFO: called by accept_answer_button
 // HOST accepting answer package from guest
 async function acceptAnswer() {
-	const possibleAnswerString = navigator.clipboard.readText();
+	const possibleAnswerString = await navigator.clipboard.readText();
 	if (!possibleAnswerString) {
 		console.error("Error parsing answer");
 		return;
@@ -416,9 +434,8 @@ async function acceptAnswer() {
 		return !!answer;
 	}
 
-	const roomConnection = existingRoomConnections
-		// make sure we are only looking at room connections that are "connecting"
-		.filter(
+	const roomConnection = roomConnections.filter(
+		// pick a room connection that isn't connected to another peer
 			(connection) =>
 				connection.peerConnection.connectionState === "connecting",
 		)
@@ -433,7 +450,7 @@ async function acceptAnswer() {
 	if (!roomConnection || !goodAnswer) {
 		console.error(
 			"No room found to match given answer ids",
-			existingRoomConnections,
+			roomConnections,
 			answerPackage,
 		);
 		return;
@@ -441,6 +458,8 @@ async function acceptAnswer() {
 
 	// a answer exists for a peer connection that hasn't been completed
 	roomConnection.peerConnection.setRemoteDescription(goodAnswer.description);
+
+	console.log("adding candidates from answer...")
 
 	// add all the answers' candidates in any order
 	await Promise.all(
@@ -450,6 +469,7 @@ async function acceptAnswer() {
 	);
 	// To indicate the offer had no more candidates, pass in undefined
 	await roomConnection.peerConnection.addIceCandidate(undefined);
+	console.log("finished accepting answser")
 }
 </script>
 	</body>
