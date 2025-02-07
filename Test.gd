@@ -59,8 +59,7 @@ func _on_join_room_button():
 		print("Test must be run on Web export")
 		return
 
-	print("Attempting to parse offer package")
-	navigator.clipboard.readText().then(parse_offer_callback)
+	window.receiveConnectionOffers() #.then(answers_generated_callback)
 
 func _on_accept_answer_button():
 	if !OS.has_feature('web'):
