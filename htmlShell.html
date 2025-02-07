@@ -225,14 +225,17 @@ const peerConnectionSettings = {
 	],
 };
 
-// object containing room connections
+// object containing room connections, set when HOST
 let roomConnections = {};
 
+// object containing info about host, set when GUEST
+let hostConnection = {};
+
 // INFO: called by generate_offers_button
-async function generateRoomConnections() {
+async function generateRoomConnections(connectionsToGenerate) {
+	// create a new WebRTC peer connection for each peer joining
 	const connections = await Promise.all(
-		// TODO: make this an argument
-		Array.from({ length: 4 }, generateRoomConnection),
+		Array.from({ length: connectionsToGenerate }, generateRoomConnection),
 	);
 
 	// close all existing connections if they exist
@@ -244,12 +247,21 @@ async function generateRoomConnections() {
 	// set room connections to global variable to be accepting answers
 	roomConnections = connections;
 
-	const offerPackage = JSON.stringify(connections.map((connection) => connection.package));
+	const offerPackage = JSON.stringify(
+		connections.map((connection) => connection.package),
+	);
 
 	// output in the form of a copy and paste package
 	await navigator.clipboard.writeText(offerPackage);
 	console.log(offerPackage);
 	console.log("...saved to clipboard");
+
+	return JSON.stringify({
+		success: true,
+		message: "Room offer was saved to clipboard",
+		offerString: offerPackage,
+		roomConnections,
+	});
 }
 
 // create a connection in generateRoomConnections, will be called MAX_ROOM_SIZE times
@@ -303,10 +315,10 @@ async function generateRoomConnection() {
 		console.log(event);
 		const dataChannel = event.target;
 		dataChannel.send("Hi from Host");
-	}
+	};
 	output.channel.onmessage = (msgEvent) => {
-		console.log("recieved message: from Guest", msgEvent.data)
-	}
+		console.log("recieved message: from Guest", msgEvent.data);
+	};
 
 	// create offer to start generating ice candidates
 	const offer = await pc.createOffer();
@@ -326,24 +338,36 @@ async function receiveConnectionOffers() {
 	// determine if offers are valid
 	if (!offers || offers.length === 0) {
 		console.error("Error parsing offers: ", offers);
-		return;
+		return JSON.stringify({
+			success: false,
+			error: `Error parsing offers: ${JSON.stringify(offers)}`,
+		});
 	}
 	const validOffers = offers.filter(
 		(offer) => offer.candidates && offer.description,
 	);
 	if (validOffers.length === 0) {
 		console.error("No offers to parse: ", offers);
-		return;
+		return JSON.stringify({
+			success: false,
+			error: `No offers to parse: ${JSON.stringify(offers)}`,
+		});
 	}
 
 	// we have valid offers
 	const answers = await Promise.all(validOffers.map(receiveConnectionOffer));
-	const answerPackage = JSON.stringify(answers.map(answer => answer.package));
+	const answerPackage = JSON.stringify(answers.map((answer) => answer.package));
 
 	await navigator.clipboard.writeText(answerPackage);
 
 	console.log(answerPackage);
 	console.log("...copied to clipboard");
+
+	return JSON.stringify({
+		success: true,
+		message: "Answer was saved to clipboard",
+		answerString: answerPackage,
+	});
 }
 
 async function receiveConnectionOffer(offer) {
@@ -392,13 +416,15 @@ async function receiveConnectionOffer(offer) {
 	});
 	output.channel.onopen = (event) => {
 		console.log("Channel to Host was opened");
+		// set host connection to global variable to send messages through
+		hostConnection = pc;
 		console.log(event);
 		const dataChannel = event.target;
 		dataChannel.send("Hi from guest");
-	}
+	};
 	output.channel.onmessage = (msgEvent) => {
-		console.log("recieved message: from Host", msgEvent.data)
-	}
+		console.log("recieved message: from Host", msgEvent.data);
+	};
 
 	const answer = await pc.createAnswer();
 	await pc.setLocalDescription(answer);
@@ -417,12 +443,11 @@ async function receiveConnectionOffer(offer) {
 }
 
 // INFO: called by accept_answer_button
-// HOST accepting answer package from guest
 async function acceptAnswer() {
 	const possibleAnswerString = await navigator.clipboard.readText();
 	if (!possibleAnswerString) {
 		console.error("Error parsing answer");
-		return;
+		return JSON.stringify({ success: false, error: "Error parsing answer" });
 	}
 	const answerPackage = JSON.parse(possibleAnswerString);
 
@@ -434,8 +459,9 @@ async function acceptAnswer() {
 		return !!answer;
 	}
 
-	const roomConnection = roomConnections.filter(
-		// pick a room connection that isn't connected to another peer
+	const guestConnection = roomConnections
+		.filter(
+			// pick a room connection that isn't connected to another peer
 			(connection) =>
 				connection.peerConnection.connectionState === "connecting",
 		)
@@ -447,29 +473,33 @@ async function acceptAnswer() {
 				findGoodAnswer(offerPkg.id),
 		);
 
-	if (!roomConnection || !goodAnswer) {
+	if (!guestConnection || !goodAnswer) {
 		console.error(
 			"No room found to match given answer ids",
 			roomConnections,
 			answerPackage,
 		);
-		return;
+		return JSON.stringify({
+			success: false,
+			answerString: answerPackage,
+			currentConnections: JSON.stringify(roomConnections),
+		});
 	}
 
 	// a answer exists for a peer connection that hasn't been completed
-	roomConnection.peerConnection.setRemoteDescription(goodAnswer.description);
-
-	console.log("adding candidates from answer...")
+	guestConnection.peerConnection.setRemoteDescription(goodAnswer.description);
 
 	// add all the answers' candidates in any order
 	await Promise.all(
 		goodAnswer.candidates.map((candidate) =>
-			roomConnection.peerConnection.addIceCandidate(candidate),
+			guestConnection.peerConnection.addIceCandidate(candidate),
 		),
 	);
 	// To indicate the offer had no more candidates, pass in undefined
-	await roomConnection.peerConnection.addIceCandidate(undefined);
-	console.log("finished accepting answser")
+	await guestConnection.peerConnection.addIceCandidate(undefined);
+	console.log("finished accepting answser");
+
+	return JSON.stringify({ success: true, message: "An answer was accepted" });
 }
 </script>
 	</body>

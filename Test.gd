@@ -1,70 +1,112 @@
 extends Node2D
 
-var console
-var document
 var window
-var Promise
 var navigator
-var jsJSON
+const ROOM_SIZE = 4
 
-# must keep callback in global scope so it isn't discarded
-var generate_offers_callback = JavaScriptBridge.create_callback(_on_generate_offers)
-func _on_generate_offers(args):
-	var result = args[0]
-	console.log(result)
-	print("Offers:", jsJSON.stringify(result))
+var room_offer: String
 
-	navigator.clipboard.writeText(jsJSON.stringify(result))
+func not_on_web() -> bool:
+	if !OS.has_feature('web'):
+		print("Test must be run on Web export")
+		return true
+	return false
+
+func get_object_from_js(js_args: Array):
+	var json = JSON.new()
+	var error = json.parse(js_args[0])
+	if error != OK:
+		print("JSON Parse Error: ", json.get_error_message(), " in ", js_args[0], " at line ", json.get_error_line())
+		return
+	var result = json.data
+	return result
 
 
-var parse_offer_callback = JavaScriptBridge.create_callback(_parse_offer_func)
-func _parse_offer_func(possible_offer_array):
-	if (possible_offer_array):
-		print("Possible Offer:", possible_offer_array)
-		console.log("Possible Offer:", JSON.stringify(possible_offer_array))
-		# var offer_pkg = jsJSON.parse(possible_offer)
-		# print(offer_pkg)
+# must keep callbacks in global scope so they aren't discarded
+var offers_generated_callback = JavaScriptBridge.create_callback(_on_offers_generated)
+func _on_offers_generated(args):
+	var result = get_object_from_js(args)
+	if (!result.success):
+		print(result)
+		return
+
+	room_offer = result.offerString
+	%copy_offer_button.visible = true
+	%accept_answer_button.disabled = false
+	%generate_offers_button.disabled = true
+
+	%join_room_button.disabled = true
+
+	print(result.message)
 
 
-var parse_answer_callback = JavaScriptBridge.create_callback(parse_answer_func)
-func parse_answer_func(possible_answer):
-	if (possible_answer):
-		var answer_pkg = jsJSON.parse(possible_answer)
-		if (answer_pkg.candidates && answer_pkg.description):
-			window.acceptAnswer(answer_pkg)
+
+
+var offers_recieved_callback = JavaScriptBridge.create_callback(_on_offers_recieved)
+func _on_offers_recieved(args):
+	var result = get_object_from_js(args)
+	if (!result.success):
+		print(result)
+		return
+
+	%join_room_button.disabled = true
+
+	%generate_offers_button.disabled = true
+	%accept_answer_button.disabled = true
+
+	print(result.message)
+
+
+var answer_accepted_callback = JavaScriptBridge.create_callback(_on_answer_accepted)
+func _on_answer_accepted(args):
+	var result = get_object_from_js(args)
+	if (!result.success):
+		print(result)
+		return
+
+	# TODO: check if room is full then disable accpeting answsers
+
+	print(result.message)
 
 
 func _ready():
-	if !OS.has_feature('web'):
-		print("Test must be run on Web export")
+	%copy_offer_button.visible = false
+	%accept_answer_button.disabled = true
+	%generate_offers_button.disabled = false
+
+	%join_room_button.disabled = false
+
+	if not_on_web():
 		return
 
-	console = JavaScriptBridge.get_interface("console")
-	document = JavaScriptBridge.get_interface("document")
+	# access the window to call js functions
 	window = JavaScriptBridge.get_interface("window")
-	Promise = JavaScriptBridge.get_interface("Promise")
 	navigator = JavaScriptBridge.get_interface("navigator")
-	jsJSON = JavaScriptBridge.get_interface("JSON")
 
 
-func _on_generate_offers_button():
-	if !OS.has_feature('web'):
-		print("Test must be run on Web export")
+func _on_generate_offers_button() -> void:
+	if not_on_web():
 		return
 
-	window.generateRoomConnections() #.then(generate_offers_callback)
+	# generate connections for each peer, host does not need one
+	window.generateRoomConnections(ROOM_SIZE - 1).then(offers_generated_callback)
 
-func _on_join_room_button():
-	if !OS.has_feature('web'):
-		print("Test must be run on Web export")
+func _on_join_room_button() -> void:
+	if not_on_web():
 		return
 
-	window.receiveConnectionOffers() #.then(answers_generated_callback)
+	window.receiveConnectionOffers().then(offers_recieved_callback)
 
-func _on_accept_answer_button():
-	if !OS.has_feature('web'):
-		print("Test must be run on Web export")
+func _on_accept_answer_button() -> void:
+	if not_on_web():
 		return
 
-	window.acceptAnswer()#.then(parse_answer_callback)
-	# navigator.clipboard.readText() 
+	window.acceptAnswer().then(answer_accepted_callback)
+
+
+func _on_copy_offer_button() -> void:
+	if (room_offer):
+		navigator.clipboard.writeText(room_offer)
+		print("Copied room offer to clipboard")
+	else:
+		printerr("No room offer in scope")
