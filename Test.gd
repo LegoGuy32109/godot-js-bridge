@@ -52,7 +52,7 @@ func _on_generate_offers_button():
 		print("Test must be run on Web export")
 		return
 
-	window.generateRoomConnections().then(generate_offers_callback)
+	window.generateRoomConnections() #.then(generate_offers_callback)
 
 func _on_join_room_button():
 	if !OS.has_feature('web'):
@@ -66,6 +66,5 @@ func _on_accept_answer_button():
 		print("Test must be run on Web export")
 		return
 
-	print("Attempting to parse answer package")
-
-	navigator.clipboard.readText().then(parse_answer_callback)
+	window.acceptAnswer()#.then(parse_answer_callback)
+	# navigator.clipboard.readText() 

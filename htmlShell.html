@@ -225,17 +225,34 @@ const peerConnectionSettings = {
 	],
 };
 
+// object containing room connections
+let roomConnections = {};
+
+// INFO: called by generate_offers_button
 async function generateRoomConnections() {
 	const connections = await Promise.all(
 		// TODO: make this an argument
 		Array.from({ length: 4 }, generateRoomConnection),
 	);
 
+	// close all existing connections if they exist
+	for (const connection in roomConnections) {
+		if (connection.peerConnection) {
+			connection.peerConnection.close();
+		}
+	}
+	// set room connections to global variable to be accepting answers
+	roomConnections = connections;
+
+	const offerPackage = JSON.stringify(connections.map((connection) => connection.package));
+
 	// output in the form of a copy and paste package
-	return connections.map((connection) => connection.package);
+	await navigator.clipboard.writeText(offerPackage);
+	console.log(offerPackage);
+	console.log("...saved to clipboard");
 }
 
-// INFO: called by generate_offers_button
+// create a connection in generateRoomConnections, will be called MAX_ROOM_SIZE times
 async function generateRoomConnection() {
 	const pc = new RTCPeerConnection(peerConnectionSettings);
 	const output = {
@@ -292,6 +309,7 @@ async function generateRoomConnection() {
 	return output;
 }
 
+// INFO: called by join_room_button
 async function receiveConnectionOffers() {
 	const possibleOfferString = await navigator.clipboard.readText();
 	const offers = JSON.parse(possibleOfferString);
@@ -309,14 +327,16 @@ async function receiveConnectionOffers() {
 		return;
 	}
 
-	// we have valid offers,
+	// we have valid offers
 	const answers = await Promise.all(validOffers.map(receiveConnectionOffer));
+	const answerPackage = JSON.stringify(answers);
 
-	console.log("Writing to clipboard: ", answers);
-	navigator.clipboard.writeText(JSON.stringify(answers));
+	await navigator.clipboard.writeText(answerPackage);
+
+	console.log(answerPackage);
+	console.log("...copied to clipboard");
 }
 
-// INFO: called by join_room_button
 async function receiveConnectionOffer(offer) {
 	const pc = new RTCPeerConnection(peerConnectionSettings);
 	const output = {
@@ -378,8 +398,16 @@ async function receiveConnectionOffer(offer) {
 	return output;
 }
 
+// INFO: called by accept_answer_button
 // HOST accepting answer package from guest
-async function acceptAnswer(existingRoomConnections, answerPackage) {
+async function acceptAnswer() {
+	const possibleAnswerString = navigator.clipboard.readText();
+	if (!possibleAnswerString) {
+		console.error("Error parsing answer");
+		return;
+	}
+	const answerPackage = JSON.parse(possibleAnswerString);
+
 	// set up function to retrieve the answer when searching for a room connection
 	let goodAnswer;
 	function findGoodAnswer(offerPkgId) {
