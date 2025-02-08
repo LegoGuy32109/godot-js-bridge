@@ -41,6 +41,35 @@ offset_right = 880.0
 offset_bottom = 106.0
 text = "Join Room"
 
+[node name="Chat Interface" type="Node2D" parent="."]
+
+[node name="HSplitContainer" type="HBoxContainer" parent="Chat Interface"]
+offset_left = 295.0
+offset_top = 450.0
+offset_right = 811.0
+offset_bottom = 485.0
+
+[node name="TextEdit" type="TextEdit" parent="Chat Interface/HSplitContainer" node_paths=PackedStringArray("shortcut_context")]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+size_flags_horizontal = 3
+focus_neighbor_right = NodePath("../Button")
+focus_next = NodePath("../Button")
+shortcut_context = NodePath("")
+placeholder_text = "message"
+wrap_mode = 1
+scroll_fit_content_height = true
+caret_blink = true
+caret_multiple = false
+
+[node name="Button" type="Button" parent="Chat Interface/HSplitContainer"]
+custom_minimum_size = Vector2(80, 35)
+layout_mode = 2
+size_flags_vertical = 8
+focus_neighbor_left = NodePath("../TextEdit")
+focus_previous = NodePath("../TextEdit")
+text = "Send"
+
 [connection signal="pressed" from="Host Controls/accept_answer_button" to="." method="_on_accept_answer_button"]
 [connection signal="pressed" from="Host Controls/generate_offers_button" to="." method="_on_generate_offers_button"]
 [connection signal="pressed" from="Host Controls/copy_offer_button" to="." method="_on_copy_offer_button"]
