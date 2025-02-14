@@ -1,0 +1,16 @@
+[configuration]
+entry_symbol = "gdext_rust_init"
+compatibility_minimum = 4.3
+reloadable = true
+
+[libraries]
+linux.debug.x86_64 =     "res://addons/among_like/target/debug/among_like.so"
+linux.release.x86_64 =   "res://addons/among_like/target/release/among_like.so"
+windows.debug.x86_64 =   "res://addons/among_like/target/debug/among_like.dll"
+windows.release.x86_64 = "res://addons/among_like/target/release/among_like.dll"
+macos.debug =            "res://addons/among_like/target/debug/among_like.dylib"
+macos.release =          "res://addons/among_like/target/release/among_like.dylib"
+macos.debug.arm64 =      "res://addons/among_like/target/debug/among_like.dylib"
+macos.release.arm64 =    "res://addons/among_like/target/release/among_like.dylib"
+web.debug.wasm32 = "res://addons/among_like/target/wasm32-unknown-emscripten/debug/among_like.wasm"
+web.release.wasm32 = "res://addons/among_like/target/wasm32-unknown-emscripten/release/among_like.wasm"

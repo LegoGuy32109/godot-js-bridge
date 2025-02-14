@@ -1,0 +1,9 @@
+default_job = "build"
+env.CARGO_TERM_COLOR = "always"
+
+[jobs.build]
+command = ["cargo", "build"]
+
+[jobs.web]
+command = ["cargo", "+nightly", "build", "-Zbuild-std", "--target", "wasm32-unknown-emscripten"]
+need_stdout = true

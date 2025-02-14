@@ -18,6 +18,7 @@ anchors_preset = 0
 
 [node name="accept_answer_button" type="Button" parent="Host Controls"]
 unique_name_in_owner = true
+layout_mode = 0
 offset_left = 57.0
 offset_top = 159.0
 offset_right = 367.0
@@ -26,6 +27,7 @@ text = "Accept Answer"
 
 [node name="generate_offers_button" type="Button" parent="Host Controls"]
 unique_name_in_owner = true
+layout_mode = 0
 offset_left = 58.0
 offset_top = 29.0
 offset_right = 368.0
@@ -34,6 +36,7 @@ text = "Generate Room Offer"
 
 [node name="copy_offer_button" type="Button" parent="Host Controls"]
 unique_name_in_owner = true
+layout_mode = 0
 offset_left = 128.0
 offset_top = 110.0
 offset_right = 293.0
@@ -72,18 +75,16 @@ text = "Join Room"
 
 [node name="Chat Interface" type="Control" parent="."]
 layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = 0.393982
+offset_right = 0.393982
 grow_horizontal = 2
 grow_vertical = 2
-metadata/_edit_lock_ = true
 
 [node name="MarginContainer" type="MarginContainer" parent="Chat Interface"]
 layout_mode = 1
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
+anchors_preset = -1
 offset_left = -301.0
 offset_top = 162.405
 offset_right = 293.0
