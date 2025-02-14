@@ -4,12 +4,10 @@
 
 [node name="Lobby UI" type="CanvasLayer"]
 script = ExtResource("1_moqa0")
-metadata/_edit_lock_ = true
 
 [node name="Host Controls" type="Control" parent="."]
 layout_mode = 3
 anchors_preset = 0
-metadata/_edit_lock_ = true
 
 [node name="accept_answer_button" type="Button" parent="Host Controls"]
 unique_name_in_owner = true
@@ -37,12 +35,14 @@ text = "Copy Offer Text"
 
 [node name="Guest Controls" type="Control" parent="."]
 layout_mode = 3
-anchors_preset = 0
-offset_left = 1153.0
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = 1.0
 offset_top = 3.0
-offset_right = 1153.0
+offset_right = 1.0
 offset_bottom = 3.0
-metadata/_edit_lock_ = true
+grow_horizontal = 0
 
 [node name="MarginContainer" type="MarginContainer" parent="Guest Controls"]
 layout_mode = 1
@@ -65,29 +65,23 @@ text = "Join Room"
 
 [node name="Chat Interface" type="Control" parent="."]
 layout_mode = 3
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
+anchors_preset = 15
+anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -50.3225
-offset_top = -17.53
-offset_right = 50.3225
 grow_horizontal = 2
-grow_vertical = 0
+grow_vertical = 2
+metadata/_edit_lock_ = true
 
 [node name="MarginContainer" type="MarginContainer" parent="Chat Interface"]
 layout_mode = 1
-anchors_preset = 7
+anchors_preset = 5
 anchor_left = 0.5
-anchor_top = 1.0
 anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -297.323
-offset_top = -94.53
-offset_right = 296.677
-offset_bottom = 0.469999
+offset_left = -301.0
+offset_top = 162.405
+offset_right = 293.0
+offset_bottom = 661.405
 grow_horizontal = 2
-grow_vertical = 0
 size_flags_horizontal = 4
 size_flags_vertical = 8
 theme_override_constants/margin_left = 30
@@ -95,10 +89,50 @@ theme_override_constants/margin_top = 30
 theme_override_constants/margin_right = 30
 theme_override_constants/margin_bottom = 30
 
-[node name="HSplitContainer" type="HBoxContainer" parent="Chat Interface/MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="Chat Interface/MarginContainer"]
+layout_mode = 2
+alignment = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="Chat Interface/MarginContainer/VBoxContainer"]
+self_modulate = Color(0.579472, 0.995113, 1, 1)
 layout_mode = 2
 
-[node name="lobby_chat_textedit" type="TextEdit" parent="Chat Interface/MarginContainer/HSplitContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="Chat Interface/MarginContainer/VBoxContainer/PanelContainer"]
+layout_mode = 2
+
+[node name="ScrollContainer" type="ScrollContainer" parent="Chat Interface/MarginContainer/VBoxContainer/PanelContainer/MarginContainer"]
+custom_minimum_size = Vector2(0, 332.445)
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="Chat Container" type="VBoxContainer" parent="Chat Interface/MarginContainer/VBoxContainer/PanelContainer/MarginContainer/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 4
+alignment = 2
+
+[node name="Chat Message3" type="HBoxContainer" parent="Chat Interface/MarginContainer/VBoxContainer/PanelContainer/MarginContainer/ScrollContainer/Chat Container"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Chat Interface/MarginContainer/VBoxContainer/PanelContainer/MarginContainer/ScrollContainer/Chat Container/Chat Message3"]
+modulate = Color(0.695503, 0.695503, 0.695503, 1)
+clip_contents = true
+layout_mode = 2
+size_flags_vertical = 0
+text = "<Joshman>"
+
+[node name="Label2" type="Label" parent="Chat Interface/MarginContainer/VBoxContainer/PanelContainer/MarginContainer/ScrollContainer/Chat Container/Chat Message3"]
+custom_minimum_size = Vector2(100, 8)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Man I have a lot so say and get off my chest so let me st-art by talking about all the cool stuff I wanted to say"
+autowrap_mode = 3
+
+[node name="HSplitContainer" type="HBoxContainer" parent="Chat Interface/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="lobby_chat_textedit" type="TextEdit" parent="Chat Interface/MarginContainer/VBoxContainer/HSplitContainer"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(450, 20)
 layout_mode = 2
@@ -111,11 +145,11 @@ scroll_fit_content_height = true
 caret_blink = true
 caret_multiple = false
 
-[node name="send_msg_button" type="Button" parent="Chat Interface/MarginContainer/HSplitContainer"]
+[node name="send_msg_button" type="Button" parent="Chat Interface/MarginContainer/VBoxContainer/HSplitContainer"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(80, 35)
 layout_mode = 2
-size_flags_vertical = 8
+size_flags_vertical = 0
 focus_neighbor_left = NodePath("../lobby_chat_textedit")
 focus_previous = NodePath("../lobby_chat_textedit")
 text = "Send"
@@ -124,4 +158,4 @@ text = "Send"
 [connection signal="pressed" from="Host Controls/generate_offers_button" to="." method="_on_generate_offers_button"]
 [connection signal="pressed" from="Host Controls/copy_offer_button" to="." method="_on_copy_offer_button"]
 [connection signal="pressed" from="Guest Controls/MarginContainer/join_room_button" to="." method="_on_join_room_button"]
-[connection signal="pressed" from="Chat Interface/MarginContainer/HSplitContainer/send_msg_button" to="." method="_on_send_msg_button_pressed"]
+[connection signal="pressed" from="Chat Interface/MarginContainer/VBoxContainer/HSplitContainer/send_msg_button" to="." method="_on_send_msg_button_pressed"]
