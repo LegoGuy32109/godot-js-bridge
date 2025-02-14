@@ -1,4 +1,4 @@
-extends Node2D
+extends CanvasLayer
 
 var window
 var navigator
@@ -40,8 +40,6 @@ func _on_offers_generated(args):
 	print(result.message)
 
 
-
-
 var offers_recieved_callback = JavaScriptBridge.create_callback(_on_offers_recieved)
 func _on_offers_recieved(args):
 	var result = get_object_from_js(args)
@@ -67,21 +65,6 @@ func _on_answer_accepted(args):
 	# TODO: check if room is full then disable accpeting answsers
 
 	print(result.message)
-
-
-func _ready():
-	%copy_offer_button.visible = false
-	%accept_answer_button.disabled = true
-	%generate_offers_button.disabled = false
-
-	%join_room_button.disabled = false
-
-	if not_on_web():
-		return
-
-	# access the window to call js functions
-	window = JavaScriptBridge.get_interface("window")
-	navigator = JavaScriptBridge.get_interface("navigator")
 
 
 func _on_generate_offers_button() -> void:
@@ -110,3 +93,27 @@ func _on_copy_offer_button() -> void:
 		print("Copied room offer to clipboard")
 	else:
 		printerr("No room offer in scope")
+
+
+func _ready():
+	%copy_offer_button.visible = false
+	%accept_answer_button.disabled = true
+	%generate_offers_button.disabled = false
+
+	%join_room_button.disabled = false
+
+	if not_on_web():
+		return
+
+	# access the window to call js functions
+	window = JavaScriptBridge.get_interface("window")
+	navigator = JavaScriptBridge.get_interface("navigator")
+
+
+
+func _on_send_msg_button_pressed() -> void:
+	var text_edit: TextEdit = %lobby_chat_textedit
+	var msg = text_edit.text
+
+	print(msg)
+	text_edit.clear()
