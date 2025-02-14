@@ -1,6 +1,13 @@
-[gd_scene load_steps=2 format=3 uid="uid://pjabcjd7xxy7"]
+[gd_scene load_steps=3 format=3 uid="uid://pjabcjd7xxy7"]
 
 [ext_resource type="Script" path="res://Test.gd" id="1_moqa0"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_agr5y"]
+bg_color = Color(0.180392, 0.180392, 0.180392, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
 
 [node name="Lobby UI" type="CanvasLayer"]
 script = ExtResource("1_moqa0")
@@ -94,8 +101,8 @@ layout_mode = 2
 alignment = 2
 
 [node name="PanelContainer" type="PanelContainer" parent="Chat Interface/MarginContainer/VBoxContainer"]
-self_modulate = Color(0.579472, 0.995113, 1, 1)
 layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_agr5y")
 
 [node name="MarginContainer" type="MarginContainer" parent="Chat Interface/MarginContainer/VBoxContainer/PanelContainer"]
 layout_mode = 2
