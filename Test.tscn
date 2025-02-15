@@ -149,8 +149,21 @@ focus_neighbor_left = NodePath("../lobby_chat_textedit")
 focus_previous = NodePath("../lobby_chat_textedit")
 text = "Send"
 
+[node name="display_name_textedit" type="TextEdit" parent="Chat Interface"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -255.394
+offset_top = 527.0
+offset_right = -131.394
+offset_bottom = 562.0
+placeholder_text = "display name"
+
 [connection signal="pressed" from="Host Controls/accept_answer_button" to="." method="_on_accept_answer_button"]
 [connection signal="pressed" from="Host Controls/generate_offers_button" to="." method="_on_generate_offers_button"]
 [connection signal="pressed" from="Host Controls/copy_offer_button" to="." method="_on_copy_offer_button"]
 [connection signal="pressed" from="Guest Controls/MarginContainer/join_room_button" to="." method="_on_join_room_button"]
 [connection signal="pressed" from="Chat Interface/MarginContainer/VBoxContainer/HSplitContainer/send_msg_button" to="." method="_on_send_msg_button_pressed"]
+[connection signal="text_changed" from="Chat Interface/display_name_textedit" to="." method="_on_display_name_text_changed"]

@@ -232,7 +232,7 @@ let roomConnections = {};
 let hostConnection = {};
 
 // INFO: called by generate_offers_button
-async function generateRoomConnections(connectionsToGenerate, onChannelOpenCallback) {
+async function generateRoomConnections(connectionsToGenerate, onChannelOpenCallback, onMessageReceivedCallback) {
 	// close all existing connections if they exist
 	for (const connection in roomConnections) {
 		if (connection.peerConnection) {
@@ -242,7 +242,7 @@ async function generateRoomConnections(connectionsToGenerate, onChannelOpenCallb
 
 	// create a new WebRTC peer connection for each peer joining
 	const connections = await Promise.all(
-		Array.from({ length: connectionsToGenerate }, () => generateRoomConnection(onChannelOpenCallback)),
+		Array.from({ length: connectionsToGenerate }, () => generateRoomConnection(onChannelOpenCallback, onMessageReceivedCallback)),
 	);
 
 	// set room connections to global variable to be accepting answers
@@ -266,7 +266,7 @@ async function generateRoomConnections(connectionsToGenerate, onChannelOpenCallb
 }
 
 // create a connection in generateRoomConnections, will be called MAX_ROOM_SIZE times
-async function generateRoomConnection(onChannelOpenCallback) {
+async function generateRoomConnection(onChannelOpenCallback, onMessageReceivedCallback) {
 	const pc = new RTCPeerConnection(peerConnectionSettings);
 	const output = {
 		peerConnection: pc,
@@ -317,9 +317,9 @@ async function generateRoomConnection(onChannelOpenCallback) {
 		console.log(event);
 		const dataChannel = event.target;
 		onChannelOpenCallback(dataChannel, id);
-		dataChannel.send("Hi from Host");
 	};
 	output.channel.onmessage = (msgEvent) => {
+		onMessageReceivedCallback(msgEvent.data, id);
 		console.log("recieved message: from Guest", msgEvent.data);
 	};
 
@@ -334,7 +334,7 @@ async function generateRoomConnection(onChannelOpenCallback) {
 }
 
 // INFO: called by join_room_button
-async function receiveConnectionOffers(onChannelOpenCallback) {
+async function receiveConnectionOffers(onChannelOpenCallback, onMessageReceivedCallback) {
 	const possibleOfferString = await navigator.clipboard.readText();
 	const offers = JSON.parse(possibleOfferString);
 
@@ -358,7 +358,7 @@ async function receiveConnectionOffers(onChannelOpenCallback) {
 	}
 
 	// we have valid offers
-	const answers = await Promise.all(validOffers.map((offer) => receiveConnectionOffer(offer, onChannelOpenCallback)));
+	const answers = await Promise.all(validOffers.map((offer) => receiveConnectionOffer(offer, onChannelOpenCallback, onMessageReceivedCallback)));
 	const answerPackage = JSON.stringify(answers.map((answer) => answer.package));
 
 	await navigator.clipboard.writeText(answerPackage);
@@ -373,7 +373,7 @@ async function receiveConnectionOffers(onChannelOpenCallback) {
 	});
 }
 
-async function receiveConnectionOffer(offer, onChannelOpenCallback) {
+async function receiveConnectionOffer(offer, onChannelOpenCallback, onMessageReceivedCallback) {
 	const pc = new RTCPeerConnection(peerConnectionSettings);
 	const output = {
 		peerConnection: pc,
@@ -424,10 +424,10 @@ async function receiveConnectionOffer(offer, onChannelOpenCallback) {
 		console.log(event);
 		const dataChannel = event.target;
 		onChannelOpenCallback(dataChannel);
-		dataChannel.send("Hi from guest");
 	};
 	output.channel.onmessage = (msgEvent) => {
 		console.log("recieved message: from Host", msgEvent.data);
+		onMessageReceivedCallback(msgEvent.data);
 	};
 
 	const answer = await pc.createAnswer();
