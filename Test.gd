@@ -114,6 +114,7 @@ func _ready():
 func _on_send_msg_button_pressed() -> void:
 	var text_edit: TextEdit = %lobby_chat_textedit
 	var msg = text_edit.text
-
-	print(msg)
 	text_edit.clear()
+
+	var new_message = ChatMessage.from("Josh", msg)
+	%chat_messages.add_child(new_message)

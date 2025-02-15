@@ -1,6 +1,7 @@
-[gd_scene load_steps=3 format=3 uid="uid://pjabcjd7xxy7"]
+[gd_scene load_steps=4 format=3 uid="uid://pjabcjd7xxy7"]
 
 [ext_resource type="Script" path="res://Test.gd" id="1_moqa0"]
+[ext_resource type="Script" path="res://lobby_chat_textedit.gd" id="2_54hdx"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_agr5y"]
 bg_color = Color(0.180392, 0.180392, 0.180392, 1)
@@ -75,6 +76,7 @@ text = "Join Room"
 
 [node name="Chat Interface" type="Control" parent="."]
 layout_mode = 3
+anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
 offset_left = 0.393982
@@ -85,10 +87,10 @@ grow_vertical = 2
 [node name="MarginContainer" type="MarginContainer" parent="Chat Interface"]
 layout_mode = 1
 anchors_preset = -1
-offset_left = -301.0
-offset_top = 162.405
-offset_right = 293.0
-offset_bottom = 661.405
+offset_left = -146.394
+offset_top = 162.0
+offset_right = 447.606
+offset_bottom = 593.0
 grow_horizontal = 2
 size_flags_horizontal = 4
 size_flags_vertical = 8
@@ -113,29 +115,13 @@ custom_minimum_size = Vector2(0, 332.445)
 layout_mode = 2
 horizontal_scroll_mode = 0
 
-[node name="Chat Container" type="VBoxContainer" parent="Chat Interface/MarginContainer/VBoxContainer/PanelContainer/MarginContainer/ScrollContainer"]
+[node name="chat_messages" type="VBoxContainer" parent="Chat Interface/MarginContainer/VBoxContainer/PanelContainer/MarginContainer/ScrollContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = 4
 alignment = 2
-
-[node name="Chat Message3" type="HBoxContainer" parent="Chat Interface/MarginContainer/VBoxContainer/PanelContainer/MarginContainer/ScrollContainer/Chat Container"]
-layout_mode = 2
-
-[node name="Label" type="Label" parent="Chat Interface/MarginContainer/VBoxContainer/PanelContainer/MarginContainer/ScrollContainer/Chat Container/Chat Message3"]
-modulate = Color(0.695503, 0.695503, 0.695503, 1)
-clip_contents = true
-layout_mode = 2
-size_flags_vertical = 0
-text = "<Joshman>"
-
-[node name="Label2" type="Label" parent="Chat Interface/MarginContainer/VBoxContainer/PanelContainer/MarginContainer/ScrollContainer/Chat Container/Chat Message3"]
-custom_minimum_size = Vector2(100, 8)
-layout_mode = 2
-size_flags_horizontal = 3
-text = "Man I have a lot so say and get off my chest so let me st-art by talking about all the cool stuff I wanted to say"
-autowrap_mode = 3
 
 [node name="HSplitContainer" type="HBoxContainer" parent="Chat Interface/MarginContainer/VBoxContainer"]
 layout_mode = 2
@@ -152,6 +138,7 @@ wrap_mode = 1
 scroll_fit_content_height = true
 caret_blink = true
 caret_multiple = false
+script = ExtResource("2_54hdx")
 
 [node name="send_msg_button" type="Button" parent="Chat Interface/MarginContainer/VBoxContainer/HSplitContainer"]
 unique_name_in_owner = true
