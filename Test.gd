@@ -6,6 +6,12 @@ const ROOM_SIZE = 4
 
 var room_offer: String
 
+# Data channel to connect you to host (you are a guest)
+var channel
+
+# Guest data channels to with their ids (you are a host)
+var guest_channels: Array[Dictionary]
+
 func not_on_web() -> bool:
 	if !OS.has_feature('web'):
 		print("Test must be run on Web export")
@@ -67,18 +73,32 @@ func _on_answer_accepted(args):
 	print(result.message)
 
 
+var on_channel_open_callback = JavaScriptBridge.create_callback(_on_channel_open)
+func _on_channel_open(args):
+	var data_channel = args[0]
+
+	# TODO: send message that someone joined
+	if args.size() > 1:
+		guest_channels.append({"channel": data_channel, "id": args[1]})
+	else:
+		channel = data_channel
+
+	%lobby_chat_textedit.visible = true
+	%send_msg_button.visible = true
+
+
 func _on_generate_offers_button() -> void:
 	if not_on_web():
 		return
 
 	# generate connections for each peer, host does not need one
-	window.generateRoomConnections(ROOM_SIZE - 1).then(offers_generated_callback)
+	window.generateRoomConnections(ROOM_SIZE - 1, on_channel_open_callback).then(offers_generated_callback)
 
 func _on_join_room_button() -> void:
 	if not_on_web():
 		return
 
-	window.receiveConnectionOffers().then(offers_recieved_callback)
+	window.receiveConnectionOffers(on_channel_open_callback).then(offers_recieved_callback)
 
 func _on_accept_answer_button() -> void:
 	if not_on_web():
@@ -102,6 +122,9 @@ func _ready():
 
 	%join_room_button.disabled = false
 
+	%lobby_chat_textedit.visible = false
+	%send_msg_button.visible = false
+
 	if not_on_web():
 		return
 
@@ -115,6 +138,14 @@ func _on_send_msg_button_pressed() -> void:
 	var text_edit: TextEdit = %lobby_chat_textedit
 	var msg = text_edit.text
 	text_edit.clear()
+
+	if channel:
+		channel.send(msg)
+	elif guest_channels:
+		for guest in guest_channels: 
+			guest.channel.send(msg)
+	else:
+		printerr("How did you get here?")
 
 	var new_message = ChatMessage.from("Josh", msg)
 	%chat_messages.add_child(new_message)

@@ -232,18 +232,19 @@ let roomConnections = {};
 let hostConnection = {};
 
 // INFO: called by generate_offers_button
-async function generateRoomConnections(connectionsToGenerate) {
-	// create a new WebRTC peer connection for each peer joining
-	const connections = await Promise.all(
-		Array.from({ length: connectionsToGenerate }, generateRoomConnection),
-	);
-
+async function generateRoomConnections(connectionsToGenerate, onChannelOpenCallback) {
 	// close all existing connections if they exist
 	for (const connection in roomConnections) {
 		if (connection.peerConnection) {
 			connection.peerConnection.close();
 		}
 	}
+
+	// create a new WebRTC peer connection for each peer joining
+	const connections = await Promise.all(
+		Array.from({ length: connectionsToGenerate }, () => generateRoomConnection(onChannelOpenCallback)),
+	);
+
 	// set room connections to global variable to be accepting answers
 	roomConnections = connections;
 
@@ -265,7 +266,7 @@ async function generateRoomConnections(connectionsToGenerate) {
 }
 
 // create a connection in generateRoomConnections, will be called MAX_ROOM_SIZE times
-async function generateRoomConnection() {
+async function generateRoomConnection(onChannelOpenCallback) {
 	const pc = new RTCPeerConnection(peerConnectionSettings);
 	const output = {
 		peerConnection: pc,
@@ -273,6 +274,8 @@ async function generateRoomConnection() {
 		candidates: [],
 		package: undefined,
 	};
+	// generate a id so we can match answers to offers in the accept function
+	const id = crypto.randomUUID();
 
 	// prepare a promise to be resolved when the ice candidates finished gathering
 	let setIceGatheringComplete;
@@ -298,8 +301,7 @@ async function generateRoomConnection() {
 				output.package = {
 					description: connection.localDescription,
 					candidates: output.candidates,
-					// generate a id so we can match answers to offers in the accept function
-					id: crypto.randomUUID(),
+					id
 				};
 				setIceGatheringComplete("Completed Gathering Candidates");
 		}
@@ -314,6 +316,7 @@ async function generateRoomConnection() {
 		console.log("Channel to Guest was opened");
 		console.log(event);
 		const dataChannel = event.target;
+		onChannelOpenCallback(dataChannel, id);
 		dataChannel.send("Hi from Host");
 	};
 	output.channel.onmessage = (msgEvent) => {
@@ -331,7 +334,7 @@ async function generateRoomConnection() {
 }
 
 // INFO: called by join_room_button
-async function receiveConnectionOffers() {
+async function receiveConnectionOffers(onChannelOpenCallback) {
 	const possibleOfferString = await navigator.clipboard.readText();
 	const offers = JSON.parse(possibleOfferString);
 
@@ -355,7 +358,7 @@ async function receiveConnectionOffers() {
 	}
 
 	// we have valid offers
-	const answers = await Promise.all(validOffers.map(receiveConnectionOffer));
+	const answers = await Promise.all(validOffers.map((offer) => receiveConnectionOffer(offer, onChannelOpenCallback)));
 	const answerPackage = JSON.stringify(answers.map((answer) => answer.package));
 
 	await navigator.clipboard.writeText(answerPackage);
@@ -370,7 +373,7 @@ async function receiveConnectionOffers() {
 	});
 }
 
-async function receiveConnectionOffer(offer) {
+async function receiveConnectionOffer(offer, onChannelOpenCallback) {
 	const pc = new RTCPeerConnection(peerConnectionSettings);
 	const output = {
 		peerConnection: pc,
@@ -420,6 +423,7 @@ async function receiveConnectionOffer(offer) {
 		hostConnection = pc;
 		console.log(event);
 		const dataChannel = event.target;
+		onChannelOpenCallback(dataChannel);
 		dataChannel.send("Hi from guest");
 	};
 	output.channel.onmessage = (msgEvent) => {
